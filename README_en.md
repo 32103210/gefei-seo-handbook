@@ -5,13 +5,16 @@
 > 出海 AI 工具站从 0 到百万流量实战手册
 
 [![CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)](#)
+[![Stars](https://img.shields.io/github/stars/32103210/gefei-seo-handbook?style=flat&label=%E2%98%85%200)](https://github.com/32103210/gefei-seo-handbook/stargazers)
+[![Forks](https://img.shields.io/github/forks/32103210/gefei-seo-handbook?style=flat&label=%E2%9C%85%200)](https://github.com/32103210/gefei-seo-handbook/network/members)
 [![Book Chapters](https://img.shields.io/badge/chapters-29-orange.svg)](#table-of-contents)
 [![Language](https://img.shields.io/badge/lang-English-red.svg)](#)
 
 ---
 
 ## What Is This?
+
+> **⭐ Stars: 0** · **🍴 Forks: 0** · Updated automatically every 6 hours
 
 The **Gefei SEO Handbook** is a practical guide to building AI tools sites that rank on Google and monetize through AdSense. It is compiled from 120+ original articles on the WeChat public account "哥飞" (Gefei — @gefei), an independent developer who has been building and monetizing websites since 2012.
 

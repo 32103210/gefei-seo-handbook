@@ -5,7 +5,8 @@
 > Nourish Your Website for Retirement — Build AI Tools Sites for Global Audience
 
 [![CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)](#)
+[![Stars](https://img.shields.io/github/stars/32103210/gefei-seo-handbook?style=flat&label=%E2%98%85%200)](https://github.com/32103210/gefei-seo-handbook/stargazers)
+[![Forks](https://img.shields.io/github/forks/32103210/gefei-seo-handbook?style=flat&label=%E2%9C%85%200)](https://github.com/32103210/gefei-seo-handbook/network/members)
 [![Book Chapters](https://img.shields.io/badge/chapters-29-orange.svg)](#书籍目录--book-contents)
 [![Language](https://img.shields.io/badge/lang-CH%2BEN-red.svg)](#)
 

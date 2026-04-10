@@ -1,0 +1,134 @@
+name: Update Star Count
+
+on:
+  schedule:
+    # Run every 6 hours: 0:00, 6:00, 12:00, 18:00 UTC
+    - cron: '0 */6 * * *'
+  workflow_dispatch:   # Allow manual trigger
+  push:               # Also run on every push to keep things in sync
+
+concurrency:
+  group: update-stars
+  cancel-in-progress: false
+
+jobs:
+  update-stars:
+    name: Fetch GitHub Stars
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # Need write to commit README changes
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Fetch star count & update README
+        id: update
+        run: |
+          set -e
+
+          REPO="32103210/gefei-seo-handbook"
+
+          # Get star count from GitHub API
+          STARS=$(curl -s -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPO" | \
+            python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('stargazers_count',0))")
+
+          echo "Current Stars: $STARS"
+          echo "stars=$STARS" >> $GITHUB_OUTPUT
+
+          # Also fetch fork count
+          FORKS=$(curl -s -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPO" | \
+            python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('forks_count',0))")
+
+          echo "Forks: $FORKS"
+          echo "forks=$FORKS" >> $GITHUB_OUTPUT
+
+          # Update README.md star badge and numbers
+          # Update the English README (README_en.md)
+          python3 << EOF
+          import re
+          import os
+
+          stars = "$STARS"
+          forks = "$FORKS"
+
+          # Format: add thousand separators
+          stars_fmt = f"{int(stars):,}"
+          forks_fmt = f"{int(forks):,}"
+
+          # Update README_en.md
+          readme = "README_en.md"
+          if os.path.exists(readme):
+              with open(readme, "r", encoding="utf-8") as f:
+                  content = f.read()
+
+              # Update star badge
+              content = re.sub(
+                  r'\[\!\[Stars\]\(https://img\.shields\.io/github/stars/[^\)]+\)\]\([^)]+\)',
+                  f'[![Stars](https://img.shields.io/github/stars/32103210/gefei-seo-handbook?style=flat&label=%E2%98%85%20{stars_fmt})](https://github.com/32103210/gefei-seo-handbook/stargazers)',
+                  content
+              )
+              # Update fork badge
+              content = re.sub(
+                  r'\[\!\[Forks\]\(https://img\.shields\.io/github/forks/[^\)]+\)\]\([^)]+\)',
+                  f'[![Forks](https://img.shields.io/github/forks/32103210/gefei-seo-handbook?style=flat&label=%E2%9C%85%20{forks_fmt})](https://github.com/32103210/gefei-seo-handbook/network/members)',
+                  content
+              )
+
+              # Update star count text
+              content = re.sub(
+                  r'\*\*⭐ Stars: \*\* \d+(,\d+)*',
+                  f'**⭐ Stars: ** {stars_fmt}',
+                  content
+              )
+              content = re.sub(
+                  r'\*\*🍴 Forks: \*\* \d+(,\d+)*',
+                  f'**🍴 Forks: ** {forks_fmt}',
+                  content
+              )
+
+              with open(readme, "w", encoding="utf-8") as f:
+                  f.write(content)
+              print(f"Updated README_en.md — Stars: {stars_fmt}, Forks: {forks_fmt}")
+
+          # Update README.md (bilingual)
+          readme_zh = "README.md"
+          if os.path.exists(readme_zh):
+              with open(readme_zh, "r", encoding="utf-8") as f:
+                  content = f.read()
+
+              # Update star badge
+              content = re.sub(
+                  r'\[\!\[CC BY-NC-SA 4\.0\]\(https://img\.shields\.io/badge/license-CC%20BY--NC--SA%204\.0-blue\.svg\)\]\(https://creativecommons\.org/licenses/by-nc-sa/4\.0/\)\n\[!\[Status\]\([^]]+\)\]\([^)]+\)\n\[!\[Book Chapters\]\([^]]+\)\]\([^)]+\)\n\[!\[Language\]\([^]]+\)\]\([^)]+\)',
+                  lambda m: f'[![CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)\n[![Stars](https://img.shields.io/github/stars/32103210/gefei-seo-handbook?style=flat&label=%E2%98%85%20{stars_fmt})](https://github.com/32103210/gefei-seo-handbook/stargazers)\n[![Forks](https://img.shields.io/github/forks/32103210/gefei-seo-handbook?style=flat&label=%E2%9C%85%20{forks_fmt})](https://github.com/32103210/gefei-seo-handbook/network/members)\n[![Book Chapters](https://img.shields.io/badge/chapters-29-orange.svg)](#书籍目录--book-contents)\n[![Language](https://img.shields.io/badge/lang-CH%2BEN-red.svg)](#)',
+                  content
+              )
+
+              with open(readme_zh, "w", encoding="utf-8") as f:
+                  f.write(content)
+              print(f"Updated README.md — Stars: {stars_fmt}, Forks: {forks_fmt}")
+
+          print("Done.")
+          EOF
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add README.md README_en.md
+            git commit -m "ci: update star & fork count [skip ci]"
+            git push
+            echo "README updated and pushed."
+          fi
